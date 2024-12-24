@@ -19,12 +19,10 @@ class ArticleRepositoryInterface implements IRepository
 
     public function get(UUID $uuid, MySQL $openConnection = null) : Article
     {
-        $articleQuery = $this->mysql->query("SELECT * FROM articles WHERE articles.uuid = '$uuid' LIMIT 1");
-        if ($articleQuery->num_rows == 0)
-        {
-            throw new NotFoundException("Could not find any article with UUID $uuid in the database.");
-        }
-        $articleData = $articleQuery->fetch_assoc();
+        $articleData = $this->mysql->queryWithException(
+            "SELECT * FROM articles WHERE articles.uuid = '$uuid' LIMIT 1",
+            "Could not find any article with UUID $uuid in the database."
+        )->fetch_assoc();
 
         $article = $this->dataToArticle($articleData);
 
@@ -33,14 +31,13 @@ class ArticleRepositoryInterface implements IRepository
 
     public function getRandom() : Article
     {
-        $articleQuery = $this->mysql->query("SELECT * FROM articles ORDER BY RAND() LIMIT 1");
-        if ($articleQuery->num_rows == 0)
-        {
-            throw new NotFoundException("Article table is empty.");
-        }
-        $articleData = $articleQuery->fetch_assoc();
+        $articleData = $this->mysql->queryWithException(
+            "SELECT * FROM articles ORDER BY RAND() LIMIT 1",
+            "Article table is empty."
+        )->fetch_assoc();
 
-        $article = $this->dataToArticle($articleData, $this->mysql);
+        $article = $this->dataToArticle($articleData);
+
         return $article;
     }
 
@@ -59,11 +56,7 @@ class ArticleRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
-        $result = $this->mysql->query("INSERT INTO articles VALUES 
+        $this->mysql->query("INSERT INTO articles VALUES 
             ('$model->id', '" . $model->author->id  . "', '$model->header', '$model->text')");
-        if (!$result)
-        {
-            die("Unknown error while adding data to the articles table");
-        }
     }
 }

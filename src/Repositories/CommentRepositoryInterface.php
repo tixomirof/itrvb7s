@@ -20,15 +20,12 @@ class CommentRepositoryInterface implements IRepository
 
     public function get(UUID $uuid) : Comment
     {
-        $commentQuery = $this->mysql->query("SELECT * FROM comments WHERE comments.uuid = '$uuid' LIMIT 1");
-        if ($commentQuery->num_rows == 0)
-        {
-            throw new NotFoundException("Could not find any comment with UUID $uuid in the database.");
-        }
-        $commentData = $commentQuery->fetch_assoc();
+        $commentData = $this->mysql->queryWithException(
+            "SELECT * FROM comments WHERE comments.uuid = '$uuid' LIMIT 1",
+            "Could not find any comment with UUID $uuid in the database."
+        )->fetch_assoc();
 
         $comment = $this->dataToComment($commentData);
-        if (is_null($openConnection)) $this->mysql->dispose();
 
         return $comment;
     }
@@ -66,11 +63,7 @@ class CommentRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
-        $result = $this->mysql->query("INSERT INTO comments VALUES 
+        $this->mysql->query("INSERT INTO comments VALUES 
             ('$model->id', '" . $model->author->id  . "', '" . $model->article->id . "', '$model->text')");
-        if (!$result)
-        {
-            die("Unknown error while adding data to the comments table");
-        }
     }
 }

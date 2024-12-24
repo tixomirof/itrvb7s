@@ -41,14 +41,22 @@ class MySQL
         return $this->db_con->query($query);
     }
 
+    public function queryWithException(string $query, string $errorMsg)
+    {
+        $result = $this->query($query);
+        if ($result->num_rows == 0)
+        {
+            throw new NotFoundException($errorMsg);
+        }
+        return $result;
+    }
+
     public function getUser(UUID $uuid) : User
     {
-        $userQuery = $this->query("SELECT * FROM users WHERE users.uuid = '$uuid' LIMIT 1");
-        if ($userQuery->num_rows == 0)
-        {
-            throw new NotFoundException("Could not find any user with UUID $uuid in the database.");
-        }
-        $userData = $userQuery->fetch_assoc();
+        $userData = $this->queryWithException(
+            "SELECT * FROM users WHERE users.uuid = '$uuid' LIMIT 1",
+            "Could not find any user with UUID $uuid in the database."
+        )->fetch_assoc();
 
         return new User(
             $uuid,
