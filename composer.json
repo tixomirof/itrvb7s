@@ -3,10 +3,11 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Lab03\\": "src/"
+            "ITRvB\\": "src/"
         }
     },
     "require": {
-        "fakerphp/faker": "^1.24"
+        "fakerphp/faker": "^1.24",
+        "symfony/polyfill-uuid": "^1.31"
     }
 }

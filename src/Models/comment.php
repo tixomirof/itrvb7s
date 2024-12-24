@@ -1,18 +1,19 @@
 <?php
-namespace Lab03\Models;
+namespace ITRvB\Models;
 
-use Lab03\Models\Article;
-use Lab03\Models\User;
+use ITRvB\Models\Article;
+use ITRvB\Models\User;
+use ITRvB\Models\UUID;
 
 class Comment {
-    public function __construct(int $id, User $author, Article $article, string $text) {
+    public function __construct(UUID $id, User $author, Article $article, string $text) {
         $this->id = $id;
         $this->author = $author;
         $this->article = $article;
         $this->text = $text;
     }
 
-    public int $id;
+    public UUID $id;
     public User $author;
     public Article $article;
     public string $text;

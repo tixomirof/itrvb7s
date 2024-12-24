@@ -1,17 +1,18 @@
 <?php
-namespace Lab03\Models;
+namespace ITRvB\Models;
 
-use Lab03\Models\User;
+use ITRvB\Models\User;
+use ITRvB\Models\UUID;
 
 class Article {
-    public function __construct(int $id, User $author, string $header, string $text) {
+    public function __construct(UUID $id, User $author, string $header, string $text) {
         $this->id = $id;
         $this->author = $author;
         $this->header = $header;
         $this->text = $text;
     }
 
-    public int $id;
+    public UUID $id;
     public User $author;
     public string $header;
     public string $text;
