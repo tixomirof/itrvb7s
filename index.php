@@ -19,12 +19,12 @@ use ITRvB\Models\Article;
 use ITRvB\Models\Comment;
 use ITRvB\Models\UUID;
 
-function createData()
+function createData(MySQL $mysql)
 {
-    $articleRepository = new ArticleRepositoryInterface();
-    $commentRepository = new CommentRepositoryInterface();
+    $articleRepository = new ArticleRepositoryInterface($mysql);
+    $commentRepository = new CommentRepositoryInterface($mysql);
     
-    $userSeeder = new UserSeeder();
+    $userSeeder = new UserSeeder($mysql);
     $users = $userSeeder->seed(10);
 
     $faker = Faker\Factory::create();
@@ -42,14 +42,12 @@ function createData()
     }
 }
 
-function displayData()
+function displayData(MySQL $mysql)
 {
-    $articleRepository = new ArticleRepositoryInterface();
-    $commentRepository = new CommentRepositoryInterface();
-    
-    $mysql = new MySQL();
+    $articleRepository = new ArticleRepositoryInterface($mysql);
+    $commentRepository = new CommentRepositoryInterface($mysql);
+
     $users = $mysql->getAllUsers();
-    $mysql->dispose();
 
     $article = $articleRepository->getRandom();
 
@@ -77,8 +75,12 @@ function displayData()
     }
 }
 
-//createData();
-displayData();
+$mysql = new MySQL();
+
+createData($mysql);
+displayData($mysql);
+
+$mysql->dispose();
 
 ?>
 </body>

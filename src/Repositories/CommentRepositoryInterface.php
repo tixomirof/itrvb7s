@@ -11,44 +11,48 @@ use ITRvB\Repositories\Connection\MySQL;
 
 class CommentRepositoryInterface implements IRepository
 {
-    public function get(UUID $uuid, MySQL $openConnection = null) : Comment
+    public function __construct(MySQL $mysql)
     {
-        $mysql = $openConnection;
-        if (is_null($mysql)) $mysql = new MySQL();
-        $commentQuery = $mysql->query("SELECT * FROM comments WHERE comments.uuid = '$uuid' LIMIT 1");
+        $this->mysql = $mysql;
+    }
+
+    private readonly MySQL $mysql;
+
+    public function get(UUID $uuid) : Comment
+    {
+        $commentQuery = $this->mysql->query("SELECT * FROM comments WHERE comments.uuid = '$uuid' LIMIT 1");
         if ($commentQuery->num_rows == 0)
         {
             throw new NotFoundException("Could not find any comment with UUID $uuid in the database.");
         }
         $commentData = $commentQuery->fetch_assoc();
 
-        $comment = $this->dataToComment($commentData, $mysql);
-        if (is_null($openConnection)) $mysql->dispose();
+        $comment = $this->dataToComment($commentData);
+        if (is_null($openConnection)) $this->mysql->dispose();
 
         return $comment;
     }
 
     public function getByArticle(Article $article) : array
     {
-        $mysql = new MySQL();
-        $commentQuery = $mysql->query("SELECT * FROM comments WHERE comments.article_id = '$article->id'");
+        $commentQuery = $this->mysql->query("SELECT * FROM comments WHERE comments.article_id = '$article->id'");
         if ($commentQuery->num_rows == 0) return array();
         
         $comments = array();
         while ($row = $commentQuery->fetch_assoc())
         {
-            $comment = $this->dataToComment($row, $mysql);
+            $comment = $this->dataToComment($row);
             array_push($comments, $comment);
         }
         return $comments;
     }
 
-    private function dataToComment($commentData, MySQL $mysql) : Comment
+    private function dataToComment($commentData) : Comment
     {
-        $author = $mysql->getUser(new UUID($commentData["author_id"]));
+        $author = $this->mysql->getUser(new UUID($commentData["author_id"]));
 
-        $articleRepository = new ArticleRepositoryInterface();
-        $article = $articleRepository->get(new UUID($commentData["article_id"]), $mysql);
+        $articleRepository = new ArticleRepositoryInterface($this->mysql);
+        $article = $articleRepository->get(new UUID($commentData["article_id"]));
 
         $comment = new Comment(
             new UUID($commentData["uuid"]),
@@ -62,10 +66,8 @@ class CommentRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
-        $mysql = new MySQL();
-        $result = $mysql->query("INSERT INTO comments VALUES 
+        $result = $this->mysql->query("INSERT INTO comments VALUES 
             ('$model->id', '" . $model->author->id  . "', '" . $model->article->id . "', '$model->text')");
-        $mysql->dispose();
         if (!$result)
         {
             die("Unknown error while adding data to the comments table");
