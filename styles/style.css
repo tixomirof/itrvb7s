@@ -1,0 +1,33 @@
+.article-box {
+    margin: 0 auto;
+    width: 75%;
+    font-size: 22px;
+    margin-bottom: 60px;
+}
+
+.article-box h1 {
+    text-align: center;
+    font-size: 48px;
+}
+
+.article-box h3 {
+    font-size: 26px;
+}
+
+.comment-box {
+    border: 3px solid black;
+    border-radius: 15px;
+    box-shadow: 3px 3px 9px black;
+    text-align: left;
+    padding: 15px 30px 50px 30px;
+    background-color: #ffffdd;
+    font-size: 18px;
+    font-family: 'Calibri';
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 50%;
+}
+
+.comment-box h3 {
+    text-align: right;
+}
