@@ -10,38 +10,76 @@
 <?php
 require_once __DIR__ . "/vendor/autoload.php";
 
+use ITRvB\Repositories\Seeders\UserSeeder;
+use ITRvB\Repositories\Connection\MySQL;
+use ITRvB\Repositories\ArticleRepositoryInterface;
+use ITRvB\Repositories\CommentRepositoryInterface;
 use ITRvB\Models\User;
 use ITRvB\Models\Article;
 use ITRvB\Models\Comment;
 use ITRvB\Models\UUID;
 
-$faker = Faker\Factory::create();
-$articleAuthor = User::createRandom();
-$article = new Article(UUID::random(), $articleAuthor, $faker->sentence(), $faker->text(3000));
+function createData()
+{
+    $articleRepository = new ArticleRepositoryInterface();
+    $commentRepository = new CommentRepositoryInterface();
+    
+    $userSeeder = new UserSeeder();
+    $users = $userSeeder->seed(10);
 
-?>
-<div class="article-box">
-    <h1><?php echo $article->header ?></h1>
-    <h3>UUID: <?php echo $article->id ?></h3>
-    <h3>Author: <?php echo $article->author->fullName() ?></h3>
-    <p><?php echo $article->text ?></p>
-</div>
-<?php
+    $faker = Faker\Factory::create();
+    $articleAuthor = $users[array_rand($users)];
+    $article = new Article(UUID::random(), $articleAuthor, $faker->sentence(), $faker->text(3000));
 
-$comment_count = $faker->randomDigit();
-for ($i=0; $i < $comment_count; $i++) {
-    $commentAuthor = User::createRandom(); 
-    $comment = new Comment(UUID::random(), $commentAuthor, $article, $faker->text($faker->randomNumber(3, false)));
+    $articleRepository->save($article);
+
+    $comment_count = $faker->randomDigit();
+    for ($i=0; $i < $comment_count; $i++) {
+        $commentAuthor = $users[array_rand($users)]; 
+        $comment = new Comment(UUID::random(), $commentAuthor, $article, $faker->text($faker->randomNumber(3, false)));
+
+        $commentRepository->save($comment);
+    }
+}
+
+function displayData()
+{
+    $articleRepository = new ArticleRepositoryInterface();
+    $commentRepository = new CommentRepositoryInterface();
+    
+    $mysql = new MySQL();
+    $users = $mysql->getAllUsers();
+    $mysql->dispose();
+
+    $article = $articleRepository->getRandom();
 
     ?>
-    <div class="comment-box">
-        <h3><?php echo $comment->author->fullName(); ?></h3>
-        <?php
-        echo $comment->text;
-        ?>
+    <div class="article-box">
+        <h1><?php echo $article->header ?></h1>
+        <h3>UUID: <?php echo $article->id ?></h3>
+        <h3>Author: <?php echo $article->author->fullName() ?></h3>
+        <p><?php echo $article->text ?></p>
     </div>
     <?php
+
+    $comments = $commentRepository->getByArticle($article);
+
+    foreach ($comments as $comment)
+    {
+        ?>
+        <div class="comment-box">
+            <h3><?php echo $comment->author->fullName(); ?></h3>
+            <?php
+            echo $comment->text;
+            ?>
+        </div>
+        <?php
+    }
 }
+
+//createData();
+displayData();
+
 ?>
 </body>
 </html>
