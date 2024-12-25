@@ -17,7 +17,7 @@ class ArticleRepositoryInterface implements IRepository
 
     private readonly MySQL $mysql;
 
-    public function get(UUID $uuid, MySQL $openConnection = null) : Article
+    public function get(UUID $uuid) : Article
     {
         $articleData = $this->mysql->queryWithException(
             "SELECT * FROM articles WHERE articles.uuid = '$uuid' LIMIT 1",
@@ -58,5 +58,10 @@ class ArticleRepositoryInterface implements IRepository
     {
         $this->mysql->query("INSERT INTO articles VALUES 
             ('$model->id', '" . $model->author->id  . "', '$model->header', '$model->text')");
+    }
+
+    public function delete(UUID $uuid) : void
+    {
+        $this->mysql->query("DELETE FROM articles WHERE articles.uuid = '$uuid'");
     }
 }

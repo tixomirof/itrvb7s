@@ -66,4 +66,9 @@ class CommentRepositoryInterface implements IRepository
         $this->mysql->query("INSERT INTO comments VALUES 
             ('$model->id', '" . $model->author->id  . "', '" . $model->article->id . "', '$model->text')");
     }
+
+    public function delete(UUID $uuid) : void
+    {
+        $this->mysql->query("DELETE FROM comments WHERE comments.uuid = '$uuid'");
+    }
 }

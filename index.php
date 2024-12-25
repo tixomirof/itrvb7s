@@ -77,7 +77,7 @@ function displayData(MySQL $mysql)
 
 $mysql = new MySQL();
 
-createData($mysql);
+//createData($mysql);
 displayData($mysql);
 
 $mysql->dispose();

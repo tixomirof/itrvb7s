@@ -76,6 +76,11 @@ class MySQL
         }
     }
 
+    public function deleteUser(UUID $uuid) : void
+    {
+        $this->query("DELETE FROM users WHERE users.uuid = '$uuid'");
+    }
+
     public function getAllUsers() : array
     {
         $result = $this->query("SELECT * FROM users");
@@ -96,5 +101,10 @@ class MySQL
     {
         $this->db_con->close();
         $this->disposed = true;
+    }
+
+    public function isDisposed() : bool
+    {
+        return $this->disposed;
     }
 }
