@@ -41,6 +41,20 @@ class ArticleRepositoryInterface implements IRepository
         return $article;
     }
 
+    public function getAll() : array
+    {
+        $articleQuery = $this->mysql->query("SELECT * FROM articles");
+        if ($articleQuery->num_rows == 0) return array();
+        
+        $articles = array();
+        while ($row = $articleQuery->fetch_assoc())
+        {
+            $article = $this->dataToArticle($row);
+            array_push($articles, $article);
+        }
+        return $articles;
+    }
+
     private function dataToArticle($articleData) : Article
     {
         $author = $this->mysql->getUser(new UUID($articleData["author_id"]));
@@ -63,5 +77,10 @@ class ArticleRepositoryInterface implements IRepository
     public function delete(UUID $uuid) : void
     {
         $this->mysql->query("DELETE FROM articles WHERE articles.uuid = '$uuid'");
+    }
+
+    public function getConnection() : MySQL
+    {
+        return $this->mysql;
     }
 }
