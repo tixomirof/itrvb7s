@@ -56,10 +56,7 @@ class ArticleController implements IController
             }
         }
 
-        header($response['status_code_header']);
-        if ($response['body']) {
-            echo $response['body'];
-        }
+        return $response;
     }
 
     private function getAllArticles()

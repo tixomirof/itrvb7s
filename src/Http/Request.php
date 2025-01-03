@@ -36,7 +36,13 @@ class Request
         $this->setCors();
         $mysql = new MySQL();
         $controller->init($mysql);
-        $controller->processRequest($this);
+
+        $response = $controller->processRequest($this);
+        header($response['status_code_header']);
+        if ($response['body']) {
+            echo $response['body'];
+        }
+        
         $mysql->dispose();
     }
 }
