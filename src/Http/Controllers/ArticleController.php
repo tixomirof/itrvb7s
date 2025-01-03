@@ -45,7 +45,7 @@ class ArticleController implements IController
                     };
                     break;
                 case 'POST':
-                    $response = $this->createArticleFromRequest();
+                    $response = $this->createArticleFromRequest($request);
                     break;
                 case 'DELETE':
                     $response = $this->deleteArticle($articleUUID);
@@ -79,9 +79,9 @@ class ArticleController implements IController
         }
     }
 
-    private function createArticleFromRequest()
+    private function createArticleFromRequest(Request $request)
     {
-        $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+        $input = $request->getBody();
         $article = $this->validateArticle($input);
         if (!$article) {
             return $this->unprocessableEntityResponse();

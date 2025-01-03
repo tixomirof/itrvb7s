@@ -31,6 +31,11 @@ class Request
         return $_SERVER["REQUEST_METHOD"];
     }
 
+    public function getBody() : array
+    {
+        return (array) json_decode(file_get_contents('php://input'), TRUE);
+    }
+
     public function process(IController $controller)
     {
         $this->setCors();
@@ -42,7 +47,7 @@ class Request
         if ($response['body']) {
             echo $response['body'];
         }
-        
+
         $mysql->dispose();
     }
 }
