@@ -1,44 +1,61 @@
 <?php
 namespace ITRvB\Http\Controllers;
 
+use ITRvB\Interfaces\IController;
 use ITRvB\Models\Article;
 use ITRvB\Models\User;
+use ITRvB\Models\UUID;
 use ITRvB\Exceptions\NotFoundException;
+use ITRvB\Http\Request;
+use ITRvB\Repositories\ArticleRepositoryInterface;
+use ITRvB\Repositories\Connection\MySQL;
 use Exception;
 
-class ArticleController {
+class ArticleController implements IController
+{
+    private ArticleRepositoryInterface $repo;
 
-    private readonly ArticleRepositoryInterface $repo;
-    private readonly string $requestMethod;
-    private readonly ?string $articleUUID;
-
-    public function __construct(ArticleRepositoryInterface $repo, string $requestMethod, ?string $articleUUID = null)
+    public function init(MySQL $mysql)
     {
-        $this->repo = $repo;
-        $this->requestMethod = $requestMethod;
-        $this->articleUUID = $articleUUID;
+        $this->repo = new ArticleRepositoryInterface($mysql);
     }
 
-    public function processRequest()
+    public function processRequest(Request $request)
     {
-        switch ($this->requestMethod) {
-            case 'GET':
-                if ($this->articleUUID) {
-                    $response = $this->getArticle($this->articleUUID);
-                } else {
-                    $response = $this->getAllArticles();
-                };
-                break;
-            case 'POST':
-                $response = $this->createArticleFromRequest();
-                break;
-            case 'DELETE':
-                $response = $this->deleteArticle($this->articleUUID);
-                break;
-            default:
-                $response = $this->notFoundResponse();
-                break;
+        $articleUUID = null;
+        $response = null;
+
+        $arg = $request->getArguments();
+        if (isset($arg['uuid'])) {
+            try {
+                $articleUUID = new UUID((string)$arg['uuid']);
+            } catch (Exception $ex) {
+                $response = $this->unprocessableEntityResponse();
+            }
         }
+
+        if (!$response)
+        {
+            switch ($request->getRequestMethod()) {
+                case 'GET':
+                    if ($articleUUID) {
+                        $response = $this->getArticle($articleUUID);
+                    } else {
+                        $response = $this->getAllArticles();
+                    };
+                    break;
+                case 'POST':
+                    $response = $this->createArticleFromRequest();
+                    break;
+                case 'DELETE':
+                    $response = $this->deleteArticle($articleUUID);
+                    break;
+                default:
+                    $response = $this->notFoundResponse();
+                    break;
+            }
+        }
+
         header($response['status_code_header']);
         if ($response['body']) {
             echo $response['body'];
@@ -53,10 +70,10 @@ class ArticleController {
         return $response;
     }
 
-    private function getArticle(string $articleUUID)
+    private function getArticle(UUID $articleUUID)
     {
         try {
-            $article = $this->repo->get(new UUID($articleUUID));
+            $article = $this->repo->get($articleUUID);
             $response['status_code_header'] = 'HTTP/1.1 200 OK';
             $response['body'] = json_encode($article);
             return $response;
@@ -68,28 +85,23 @@ class ArticleController {
     private function createArticleFromRequest()
     {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (!$this->validateArticle($input)) {
+        $article = $this->validateArticle($input);
+        if (!$article) {
             return $this->unprocessableEntityResponse();
         }
 
-        $this->repo->save(new Article(
-            new UUID($input['uuid']),
-            $this->repo->getConnection()->getUser(new UUID($input['author_id'])),
-            $input['header'],
-            $input['text']
-        ));
+        $this->repo->save($article);
 
         $response['status_code_header'] = 'HTTP/1.1 201 Created';
         $response['body'] = null;
         return $response;
     }
 
-    private function deleteArticle(string $articleUUID)
+    private function deleteArticle(UUID $articleUUID)
     {
         if (!$articleUUID) return $this->notFoundResponse();
-        $uuid = new UUID($articleUUID);
 
-        $this->repo->delete($uuid);
+        $this->repo->delete($articleUUID);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = null;
         return $response;
@@ -97,22 +109,23 @@ class ArticleController {
 
     private function validateArticle($input)
     {
-        if (!isset($input['header']) || !isset($input['text'])
-            || !isset($input['uuid']) || !isset($input['author_id'])) {
-            return false;
+        if (!isset($input['header']) || !isset($input['text']) || !isset($input['author_id'])) {
+            return null;
         }
 
         try {
-            $articleUUID = new UUID($input['uuid']); // check if UUID is valid
+            $articleUUID = isset($input['uuid']) ? new UUID($input['uuid']) : UUID::random(); // check if UUID is valid
             $authorUUID = new UUID($input['author_id']); // check if UUID is valid
 
             $author = $this->repo->getConnection()->getUser($authorUUID); // check if DB has user with given UUID
+
+            $article = new Article($articleUUID, $author, $input['header'], $input['text']); // check if object creates successfully
+
+            return $article;
         }
         catch (Exception $ex) {
-            return false;
+            return null;
         }
-
-        return true;
     }
 
     private function unprocessableEntityResponse()
@@ -127,7 +140,9 @@ class ArticleController {
     private function notFoundResponse()
     {
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            'error' => 'Not found with given arguments'
+        ]);
         return $response;
     }
 }

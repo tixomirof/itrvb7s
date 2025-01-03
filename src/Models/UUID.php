@@ -3,8 +3,9 @@
 namespace ITRvB\Models;
 
 use ITRvB\Exceptions\InvalidUUIDException;
+use JsonSerializable;
 
-class UUID
+class UUID implements JsonSerializable
 {
     public function __construct(
         private readonly string $uuid,
@@ -23,5 +24,10 @@ class UUID
     public static function random() : self
     {
         return new self(uuid_create(UUID_TYPE_RANDOM));
+    }
+
+    public function jsonSerialize() : string
+    {
+        return $this->__tostring();
     }
 }
