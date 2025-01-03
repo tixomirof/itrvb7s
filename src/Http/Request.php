@@ -33,7 +33,6 @@ class Request
 
     public function process(IController $controller)
     {
-        echo $this->getRequestMethod();
         $this->setCors();
         $mysql = new MySQL();
         $controller->init($mysql);

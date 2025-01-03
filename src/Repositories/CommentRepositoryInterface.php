@@ -63,8 +63,9 @@ class CommentRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
+        $text = str_replace('\'', '\\\'', $model->text);
         $this->mysql->query("INSERT INTO comments VALUES 
-            ('$model->id', '" . $model->author->id  . "', '" . $model->article->id . "', '$model->text')");
+            ('$model->id', '" . $model->author->id  . "', '" . $model->article->id . "', '\text')");
     }
 
     public function delete(UUID $uuid) : void

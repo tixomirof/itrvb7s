@@ -70,8 +70,10 @@ class ArticleRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
+        $header = str_replace('\'', '\\\'', $model->header);
+        $text = str_replace('\'', '\\\'', $model->text);
         $this->mysql->query("INSERT INTO articles VALUES 
-            ('$model->id', '" . $model->author->id  . "', '$model->header', '$model->text')");
+            ('$model->id', '" . $model->author->id  . "', '$header', '$text')");
     }
 
     public function delete(UUID $uuid) : void
