@@ -93,7 +93,10 @@ class ArticleController implements IController
         $this->repo->save($article);
 
         $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            'result' => 'Succesfully created the Article!',
+            'article' => $article
+        ]);
         return $response;
     }
 
@@ -103,7 +106,9 @@ class ArticleController implements IController
 
         $this->repo->delete($articleUUID);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            'result' => "Database no more contains article with UUID $articleUUID"
+        ]);
         return $response;
     }
 
