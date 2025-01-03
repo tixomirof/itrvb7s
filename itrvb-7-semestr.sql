@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Дек 24 2024 г., 17:48
+-- Время создания: Янв 03 2025 г., 16:51
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -24,6 +24,18 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Структура таблицы `articleLikes`
+--
+
+CREATE TABLE `articleLikes` (
+  `uuid` varchar(36) NOT NULL,
+  `article_id` varchar(36) NOT NULL,
+  `user_id` varchar(36) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Структура таблицы `articles`
 --
 
@@ -39,7 +51,8 @@ CREATE TABLE `articles` (
 --
 
 INSERT INTO `articles` (`uuid`, `author_id`, `header`, `text`) VALUES
-('1b42fe64-a369-47f7-a269-360a3f785e5c', '7a7c8f28-b7f6-4e19-9db8-366f7693ac9e', 'Ut aspernatur labore similique provident.', 'Enim eius quis error sunt impedit. Perferendis rerum a omnis ut est sapiente quae. Ex unde autem consequuntur magnam aut dolor. Hic nihil ducimus nemo voluptas ullam maiores voluptas. Modi sed consequatur enim non consequatur voluptatem facilis. Consectetur omnis enim consequatur. Fugit esse voluptatem nulla quia perferendis laborum et veritatis. Id voluptas doloribus dignissimos corporis fugiat enim. Numquam fuga nesciunt aut quod quam ab. Iusto perferendis magni consectetur unde repellendus eum. Est ad accusamus quibusdam ipsum quaerat. Veritatis est minus voluptas corporis voluptate. Porro nesciunt nam minus aut incidunt ducimus unde. Est corporis nisi architecto aliquam voluptas est porro. Qui deleniti in sunt inventore incidunt totam molestias. Quia minus praesentium quia. Mollitia et esse id esse. Dicta reprehenderit et qui blanditiis et ut expedita. Nostrum dignissimos magnam consequatur quasi molestiae ab. Quae aliquam libero voluptatem similique. Et et et totam aliquam officia quam rem. Accusamus id distinctio et odio molestias ut. Rerum quod ut et pariatur blanditiis eligendi at consequatur. Et impedit quis architecto architecto. Quis quasi et voluptatem nam. Et omnis qui hic nesciunt ea est dolor sapiente. Est enim earum aut expedita exercitationem et dolorem. Ducimus ut ut perspiciatis excepturi ut id perspiciatis. Nemo ratione deserunt odio quaerat cupiditate. Et quam laudantium consequuntur iste quae. Illo natus non repellendus consequatur et et rerum. Necessitatibus recusandae nihil aut et voluptatem. Voluptas et possimus quam perspiciatis delectus. Excepturi vitae inventore animi eos ullam. Sint similique amet molestiae architecto consectetur praesentium tempore. Libero quos maiores aut rerum. Mollitia corrupti et tempore ratione iure odit. Quae architecto qui cupiditate ex nemo. Accusantium architecto natus velit aliquam sint. Dolorum sit possimus omnis magni est suscipit illum. Sed ipsam ab totam voluptatem quia. Numquam beatae molestiae esse voluptates adipisci. Dignissimos eos blanditiis fugiat earum perspiciatis reprehenderit. Quam rem et eos repellendus. Eos dolor aut voluptatem molestiae qui. Rerum nisi pariatur incidunt autem sint vitae. Aliquam qui corporis voluptate nostrum enim quasi sed. Inventore eum nihil ut aliquid quia et. Explicabo id aut minima fugit expedita. Dicta dolorem molestiae et modi reprehenderit. Distinctio perspiciatis hic commodi unde et. Aut quis officia quia molestias. Et molestias saepe ut aut. Temporibus et ut similique laborum saepe qui. Aspernatur rerum velit sed ut atque. Libero laboriosam rem pariatur minus reprehenderit repellat dignissimos. Eius deserunt ipsa velit et et omnis et. Id est rerum et sit quo. Itaque sint et modi labore eveniet enim. Maiores magni nulla voluptatibus ipsa beatae voluptas. Officia laudantium quo reiciendis facere. Recusandae voluptatem cumque culpa quaerat vel corrupti. Tenetur commodi ex ullam cumque.');
+('1b42fe64-a369-47f7-a269-360a3f785e5c', '7a7c8f28-b7f6-4e19-9db8-366f7693ac9e', 'Ut aspernatur labore similique provident.', 'Enim eius quis error sunt impedit. Perferendis rerum a omnis ut est sapiente quae. Ex unde autem consequuntur magnam aut dolor. Hic nihil ducimus nemo voluptas ullam maiores voluptas. Modi sed consequatur enim non consequatur voluptatem facilis. Consectetur omnis enim consequatur. Fugit esse voluptatem nulla quia perferendis laborum et veritatis. Id voluptas doloribus dignissimos corporis fugiat enim. Numquam fuga nesciunt aut quod quam ab. Iusto perferendis magni consectetur unde repellendus eum. Est ad accusamus quibusdam ipsum quaerat. Veritatis est minus voluptas corporis voluptate. Porro nesciunt nam minus aut incidunt ducimus unde. Est corporis nisi architecto aliquam voluptas est porro. Qui deleniti in sunt inventore incidunt totam molestias. Quia minus praesentium quia. Mollitia et esse id esse. Dicta reprehenderit et qui blanditiis et ut expedita. Nostrum dignissimos magnam consequatur quasi molestiae ab. Quae aliquam libero voluptatem similique. Et et et totam aliquam officia quam rem. Accusamus id distinctio et odio molestias ut. Rerum quod ut et pariatur blanditiis eligendi at consequatur. Et impedit quis architecto architecto. Quis quasi et voluptatem nam. Et omnis qui hic nesciunt ea est dolor sapiente. Est enim earum aut expedita exercitationem et dolorem. Ducimus ut ut perspiciatis excepturi ut id perspiciatis. Nemo ratione deserunt odio quaerat cupiditate. Et quam laudantium consequuntur iste quae. Illo natus non repellendus consequatur et et rerum. Necessitatibus recusandae nihil aut et voluptatem. Voluptas et possimus quam perspiciatis delectus. Excepturi vitae inventore animi eos ullam. Sint similique amet molestiae architecto consectetur praesentium tempore. Libero quos maiores aut rerum. Mollitia corrupti et tempore ratione iure odit. Quae architecto qui cupiditate ex nemo. Accusantium architecto natus velit aliquam sint. Dolorum sit possimus omnis magni est suscipit illum. Sed ipsam ab totam voluptatem quia. Numquam beatae molestiae esse voluptates adipisci. Dignissimos eos blanditiis fugiat earum perspiciatis reprehenderit. Quam rem et eos repellendus. Eos dolor aut voluptatem molestiae qui. Rerum nisi pariatur incidunt autem sint vitae. Aliquam qui corporis voluptate nostrum enim quasi sed. Inventore eum nihil ut aliquid quia et. Explicabo id aut minima fugit expedita. Dicta dolorem molestiae et modi reprehenderit. Distinctio perspiciatis hic commodi unde et. Aut quis officia quia molestias. Et molestias saepe ut aut. Temporibus et ut similique laborum saepe qui. Aspernatur rerum velit sed ut atque. Libero laboriosam rem pariatur minus reprehenderit repellat dignissimos. Eius deserunt ipsa velit et et omnis et. Id est rerum et sit quo. Itaque sint et modi labore eveniet enim. Maiores magni nulla voluptatibus ipsa beatae voluptas. Officia laudantium quo reiciendis facere. Recusandae voluptatem cumque culpa quaerat vel corrupti. Tenetur commodi ex ullam cumque.'),
+('3b1e1a63-1227-42ef-8587-aeccf23ba06e', '40bf6f35-f8b0-422f-a20d-bf8bb3ffa1d8', 'Terry Data', 'Howdy');
 
 -- --------------------------------------------------------
 
@@ -96,6 +109,14 @@ INSERT INTO `users` (`uuid`, `name`, `surname`) VALUES
 --
 
 --
+-- Индексы таблицы `articleLikes`
+--
+ALTER TABLE `articleLikes`
+  ADD PRIMARY KEY (`uuid`),
+  ADD KEY `articleLikes_FK_1` (`article_id`),
+  ADD KEY `articleLikes_FK_2` (`user_id`);
+
+--
 -- Индексы таблицы `articles`
 --
 ALTER TABLE `articles`
@@ -121,6 +142,13 @@ ALTER TABLE `users`
 --
 
 --
+-- Ограничения внешнего ключа таблицы `articleLikes`
+--
+ALTER TABLE `articleLikes`
+  ADD CONSTRAINT `articleLikes_FK_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`uuid`),
+  ADD CONSTRAINT `articleLikes_FK_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`uuid`);
+
+--
 -- Ограничения внешнего ключа таблицы `articles`
 --
 ALTER TABLE `articles`
@@ -130,8 +158,8 @@ ALTER TABLE `articles`
 -- Ограничения внешнего ключа таблицы `comments`
 --
 ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_FK_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`uuid`),
-  ADD CONSTRAINT `comments_FK_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`uuid`);
+  ADD CONSTRAINT `comments_FK_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`uuid`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `comments_FK_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`uuid`) ON DELETE CASCADE ON UPDATE RESTRICT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
