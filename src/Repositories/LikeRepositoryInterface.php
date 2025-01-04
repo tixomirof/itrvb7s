@@ -41,6 +41,18 @@ class LikeRepositoryInterface implements IRepository
         return (int)$likeCount['count'];
     }
 
+    public function getLikeByArticleAndUser(UUID $articleUuid, UUID $userUuid) : ArticleLike
+    {
+        $likeData = $this->mysql->queryWithException(
+            "SELECT * FROM articleLikes WHERE articleLikes.article_id = '$articleUuid'
+            AND articleLikes.user_id = '$userUuid' LIMIT 1",
+            "Could not find any like for article with UUID $articleUuid and user with UUID $userUuid"
+        )->fetch_assoc();
+        
+        $like = $this->dataToArticleLike($likeData);
+        return $like;
+    }
+
     public function hasUserLiked(UUID $articleUuid, UUID $userUuid) : bool
     {
         $likeCount = $this->mysql->query(
@@ -77,5 +89,10 @@ class LikeRepositoryInterface implements IRepository
     public function delete(UUID $uuid) : void
     {
         $this->mysql->query("DELETE FROM articleLikes WHERE articleLikes.uuid = '$uuid'");
+    }
+
+    public function getConnection() : MySQL
+    {
+        return $this->mysql;
     }
 }
