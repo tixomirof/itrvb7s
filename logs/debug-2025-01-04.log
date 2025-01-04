@@ -1,0 +1,7 @@
+[2025-01-04T16:07:52.124524+03:00] itrvb.INFO: ArticleRepository: saving Article with UUID fd6dc788-ec2c-4dd3-9fa7-2cc80f5875fa, Author UUID 5a73fa48-1dfd-4568-9fd2-4d6f99ec73a4, header sample header [] []
+[2025-01-04T16:07:52.137674+03:00] itrvb.INFO: ArticleRepository: retrieving Article with UUID 4a712205-d463-4b90-bc65-be98bb577b2e from the database... [] []
+[2025-01-04T16:07:52.139791+03:00] itrvb.INFO: ArticleRepository: saving Article with UUID bc4fc153-21eb-4f37-82d7-f3530f4f7f56, Author UUID 1e54e6a0-6844-45a9-934d-9ec512ec7fc8, header sample header [] []
+[2025-01-04T16:07:52.140509+03:00] itrvb.INFO: ArticleRepository: successfully saved Article with UUID bc4fc153-21eb-4f37-82d7-f3530f4f7f56 [] []
+[2025-01-04T16:07:52.141970+03:00] itrvb.INFO: ArticleRepository: retrieving Article with UUID bc4fc153-21eb-4f37-82d7-f3530f4f7f56 from the database... [] []
+[2025-01-04T16:07:52.142653+03:00] itrvb.INFO: ArticleRepository: Article with UUID bc4fc153-21eb-4f37-82d7-f3530f4f7f56 was retrieved. [] []
+[2025-01-04T16:07:52.144893+03:00] itrvb.INFO: ArticleRepository: attempting to delete Article with UUID bc4fc153-21eb-4f37-82d7-f3530f4f7f56 [] []
