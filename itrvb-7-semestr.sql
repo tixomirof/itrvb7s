@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Янв 03 2025 г., 16:51
+-- Время создания: Янв 05 2025 г., 13:12
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -32,6 +32,13 @@ CREATE TABLE `articleLikes` (
   `article_id` varchar(36) NOT NULL,
   `user_id` varchar(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `articleLikes`
+--
+
+INSERT INTO `articleLikes` (`uuid`, `article_id`, `user_id`) VALUES
+('46c7b880-cb00-4513-8671-4b4a2a6a31a5', '1b42fe64-a369-47f7-a269-360a3f785e5c', '273a1d82-3c33-4afa-a833-2a800f8d4d3a');
 
 -- --------------------------------------------------------
 
@@ -85,24 +92,25 @@ INSERT INTO `comments` (`uuid`, `author_id`, `article_id`, `text`) VALUES
 CREATE TABLE `users` (
   `uuid` varchar(36) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `surname` varchar(100) NOT NULL
+  `surname` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Таблица пользователей (Лаб4)';
 
 --
 -- Дамп данных таблицы `users`
 --
 
-INSERT INTO `users` (`uuid`, `name`, `surname`) VALUES
-('1e54e6a0-6844-45a9-934d-9ec512ec7fc8', 'Eriberto', 'Macejkovic'),
-('273a1d82-3c33-4afa-a833-2a800f8d4d3a', 'Jazmyne', 'Schuster'),
-('3c06db8f-5340-4b5b-96a0-f30ab4f3272b', 'Carol', 'McDermott'),
-('40bf6f35-f8b0-422f-a20d-bf8bb3ffa1d8', 'Terry', 'Cormier'),
-('471547b5-c623-4565-8083-72bf71b381b2', 'Sadie', 'Adams'),
-('7977916e-f27b-4f69-bfe2-967dc82f58b0', 'Alena', 'Veum'),
-('7a7c8f28-b7f6-4e19-9db8-366f7693ac9e', 'Carlie', 'Jones'),
-('7eea8379-9b52-4959-8095-efb6cf63f3df', 'Bettie', 'Bogan'),
-('9d8d295f-b9fe-42ca-b107-358dc5b4ca41', 'Gudrun', 'Breitenberg'),
-('deac3983-6459-4272-a9c9-5cc858bcdb14', 'Elda', 'Roberts');
+INSERT INTO `users` (`uuid`, `name`, `surname`, `password`) VALUES
+('1e54e6a0-6844-45a9-934d-9ec512ec7fc8', 'Eriberto', 'Macejkovic', '123'),
+('273a1d82-3c33-4afa-a833-2a800f8d4d3a', 'Jazmyne', 'Schuster', '123'),
+('3c06db8f-5340-4b5b-96a0-f30ab4f3272b', 'Carol', 'McDermott', '123'),
+('40bf6f35-f8b0-422f-a20d-bf8bb3ffa1d8', 'Terry', 'Cormier', 'P@ssw0rd'),
+('471547b5-c623-4565-8083-72bf71b381b2', 'Sadie', 'Adams', 'parol123'),
+('7977916e-f27b-4f69-bfe2-967dc82f58b0', 'Alena', 'Veum', 'meow'),
+('7a7c8f28-b7f6-4e19-9db8-366f7693ac9e', 'Carlie', 'Jones', 'itrvb7semestr'),
+('7eea8379-9b52-4959-8095-efb6cf63f3df', 'Bettie', 'Bogan', '@[pva[v4o5pba2['),
+('9d8d295f-b9fe-42ca-b107-358dc5b4ca41', 'Gudrun', 'Breitenberg', 'z12b16an1'),
+('deac3983-6459-4272-a9c9-5cc858bcdb14', 'Elda', 'Roberts', 'OOOOO3$');
 
 --
 -- Индексы сохранённых таблиц
@@ -145,8 +153,8 @@ ALTER TABLE `users`
 -- Ограничения внешнего ключа таблицы `articleLikes`
 --
 ALTER TABLE `articleLikes`
-  ADD CONSTRAINT `articleLikes_FK_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`uuid`),
-  ADD CONSTRAINT `articleLikes_FK_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`uuid`);
+  ADD CONSTRAINT `articleLikes_FK_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`uuid`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `articleLikes_FK_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`uuid`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Ограничения внешнего ключа таблицы `articles`

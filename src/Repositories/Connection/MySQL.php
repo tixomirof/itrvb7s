@@ -68,6 +68,7 @@ class MySQL
 
         return new User(
             $uuid,
+            $userData["password"],
             $userData["name"],
             $userData["surname"]
         );
@@ -77,8 +78,8 @@ class MySQL
     {
         Logger::info("MySQL: saving User with UUID $user->id and name " . $user->fullName());
 
-        $result = $this->query("INSERT INTO users (uuid, name, surname) VALUES (
-            '$user->id', '$user->name', '$user->surname')");
+        $result = $this->query("INSERT INTO users (uuid, name, surname, password) VALUES (
+            '$user->id', '$user->name', '$user->surname', '$user->password')");
 
         if (!$result)
         {
@@ -105,6 +106,7 @@ class MySQL
         {
             $user = new User(
                 new UUID($row["uuid"]),
+                $row["password"],
                 $row["name"],
                 $row["surname"]
             );

@@ -29,7 +29,7 @@ class MySQLTest extends TestCase
     #[DoesNotPerformAssertions]
     public function testAddUser() : User
     {
-        $user = new User(UUID::random(), "Alice", "Rough");
+        $user = new User(UUID::random(), "123alice\$Pw", "Alice", "Rough");
         self::$mysql->addUser($user); // must not throw an exception
         return $user;
     }
