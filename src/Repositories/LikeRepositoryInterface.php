@@ -11,6 +11,7 @@ use ITRvB\Exceptions\RepetitiveLikeException;
 use ITRvB\Interfaces\IRepository;
 use ITRvB\Repositories\Connection\MySQL;
 use ITRvB\Repositories\ArticleRepositoryInterface;
+use ITRvB\Singletons\Logger;
 
 class LikeRepositoryInterface implements IRepository
 {
@@ -23,26 +24,38 @@ class LikeRepositoryInterface implements IRepository
 
     public function get(UUID $uuid) : ArticleLike
     {
+        Logger::info("LikeRepository: retrieving ArticleLike with UUID $uuid from the database...");
+
         $likeData = $this->mysql->queryWithException(
             "SELECT * FROM articleLikes WHERE articleLikes.uuid = '$uuid' LIMIT 1",
             "Could not find any article's Like with UUID $uuid in the database."
         )->fetch_assoc();
 
         $like = $this->dataToArticleLike($likeData);
+
+        Logger::info("LikeRepository: ArticleLike with UUID $uuid was retrieved.");
+
         return $like;
     }
 
     public function getCountByArticleUUID(UUID $articleUuid) : int
     {
-        $likeCount = $this->mysql->query(
+        Logger::info("LikeRepository: retrieving like count for Article with UUID $articleUuid");
+
+        $likeCountData = $this->mysql->query(
             "SELECT COUNT(*) as count FROM articleLikes WHERE articleLikes.article_id = '$articleUuid'"
         )->fetch_assoc();
 
-        return (int)$likeCount['count'];
+        $likeCount = (int)$likeCountData['count'];
+        Logger::info("LikeRepository: Article with UUID $articleUuid has $likeCount likes.");
+
+        return $likeCount;
     }
 
     public function getLikeByArticleAndUser(UUID $articleUuid, UUID $userUuid) : ArticleLike
     {
+        Logger::info("LikeRepository: retrieving like by user $userUuid and article $articleUuid");
+
         $likeData = $this->mysql->queryWithException(
             "SELECT * FROM articleLikes WHERE articleLikes.article_id = '$articleUuid'
             AND articleLikes.user_id = '$userUuid' LIMIT 1",
@@ -50,17 +63,26 @@ class LikeRepositoryInterface implements IRepository
         )->fetch_assoc();
         
         $like = $this->dataToArticleLike($likeData);
+
+        Logger::info("LikeRepository: like was successfully found");
+
         return $like;
     }
 
     public function hasUserLiked(UUID $articleUuid, UUID $userUuid) : bool
     {
+        Logger::info("LikeRepository: checking if user $userUuid has liked article $articleUuid");
+
         $likeCount = $this->mysql->query(
             "SELECT COUNT(*) as count FROM articleLikes 
             WHERE articleLikes.article_id = '$articleUuid' AND articleLikes.user_id = '$userUuid'"
         )->fetch_assoc();
 
-        return (int)$likeCount['count'] > 0;
+        $hasLiked = (int)$likeCount['count'] > 0;
+
+        Logger::info("LikeRepository: has user $userUuid liked article $articleUuid: $hasLiked");
+
+        return $hasLiked;
     }
 
     private function dataToArticleLike($likeData) : ArticleLike
@@ -79,15 +101,22 @@ class LikeRepositoryInterface implements IRepository
 
     public function save($model) : void
     {
+        Logger::info("LikeRepository: attempting to save ArticleLike from " .
+            $model->user->id . " to " . $model->article->id . " with itself's UUID $model->id");
+
         if ($this->hasUserLiked($model->article->id, $model->user->id)) {
+            Logger::warning("LikeRepository: an attempt to save a duplicate ArticleLike.");
             throw new RepetitiveLikeException("Cannot leave a like for an article that has already been liked by this user.");
         }
         $this->mysql->query("INSERT INTO articleLikes VALUES
             ('$model->id', '" . $model->article->id . "', '" . $model->user->id . "')");
+
+        Logger::info("LikeRepository: successfully saved ArticleLike with UUID $model->id");
     }
 
     public function delete(UUID $uuid) : void
     {
+        Logger::info("LikeRepository: attempting to delete ArticleLike with UUID $uuid");
         $this->mysql->query("DELETE FROM articleLikes WHERE articleLikes.uuid = '$uuid'");
     }
 
