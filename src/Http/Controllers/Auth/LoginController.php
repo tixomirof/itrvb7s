@@ -34,7 +34,7 @@ class LoginController implements IController
         $user = $this->validateUser($body);
         if (!$user) return ResponseManager::unprocessableEntityResponse();
         
-        if ($user->password !== User::hashPassword($body['password'])) {
+        if ($user->password !== User::hashPassword($body['password'], $user->id)) {
             return ResponseManager::makeBadRequestResponse('Wrong password');
         }
 

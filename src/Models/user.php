@@ -26,9 +26,14 @@ class User {
         return new User(UUID::random(), $faker->password(), $faker->firstName(), $faker->lastName());
     }
 
-    public static function hashPassword(string $password) : string
+    public static function hashPassword(string $password, UUID $uuid) : string
     {
-        return hash('sha256', $password);
+        return hash('sha256', $password . $uuid);
+    }
+
+    public function getHashedPassword()
+    {
+        return self::hashPassword($this->password, $this->id);
     }
 
     public function fullName() : string {
