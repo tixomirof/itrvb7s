@@ -78,8 +78,10 @@ class MySQL
     {
         Logger::info("MySQL: saving User with UUID $user->id and name " . $user->fullName());
 
+        $hashedPassword = User::hashPassword($user->password);
+        $user->password = $hashedPassword;
         $result = $this->query("INSERT INTO users (uuid, name, surname, password) VALUES (
-            '$user->id', '$user->name', '$user->surname', '$user->password')");
+            '$user->id', '$user->name', '$user->surname', '$hashedPassword')");
 
         if (!$result)
         {

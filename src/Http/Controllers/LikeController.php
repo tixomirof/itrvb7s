@@ -8,6 +8,7 @@ use ITRvB\Models\ArticleLike;
 use ITRvB\Models\User;
 use ITRvB\Models\UUID;
 use ITRvB\Http\Request;
+use ITRvB\Http\ResponseManager;
 use ITRvB\Repositories\LikeRepositoryInterface;
 use ITRvB\Repositories\ArticleRepositoryInterface;
 use ITRvB\Repositories\Connection\MySQL;
@@ -42,7 +43,7 @@ class LikeController implements IController
     public function processRequest(Request $request)
     {
         $args = $this->getArguments($request);
-        if (count($args) === 0) return $this->unprocessableEntityResponse();
+        if (count($args) === 0) return ResponseManager::unprocessableEntityResponse();
 
         switch ($request->getRequestMethod()) {
             case 'GET':
@@ -55,7 +56,7 @@ class LikeController implements IController
                 $response = $this->removeLike($args);
                 break;
             default:
-                $response = $this->methodNotAllowed();
+                $response = ResponseManager::methodNotAllowed();
                 break;
         }
 
@@ -78,11 +79,11 @@ class LikeController implements IController
         $article = $this->validateArticle($args);
         $user = $this->validateUser($args);
         if (!$article || !$user) {
-            return $this->unprocessableEntityResponse();
+            return ResponseManager::unprocessableEntityResponse();
         }
 
         if ($this->repo->hasUserLiked($article->id, $user->id)) {
-            return $this->duplicateLikeResponse();
+            return ResponseManager::makeBadRequestResponse('This user had already left a like for this article');
         }
 
         $like = new ArticleLike(
@@ -103,7 +104,7 @@ class LikeController implements IController
     private function removeLike(array $args)
     {
         if (!isset($args['user']) || !$this->repo->hasUserLiked($args['article'], $args['user'])) {
-            return $this->unprocessableEntityResponse();
+            return ResponseManager::unprocessableEntityResponse();
         }
 
         $like = $this->repo->getLikeByArticleAndUser($args['article'], $args['user']);
@@ -148,32 +149,5 @@ class LikeController implements IController
         catch (Exception $ex) {
             return null;
         }
-    }
-
-    private function unprocessableEntityResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
-        return $response;
-    }
-
-    private function duplicateLikeResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 400 Bad Request';
-        $response['body'] = json_encode([
-            'error' => 'This user had already left a like for this article'
-        ]);
-        return $response;
-    }
-
-    private function methodNotAllowed()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 405 Method Not Allowed';
-        $response['body'] = json_encode([
-            'error' => 'This controller does not support given method'
-        ]);
-        return $response;
     }
 }

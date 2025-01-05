@@ -7,6 +7,7 @@ use ITRvB\Models\User;
 use ITRvB\Models\UUID;
 use ITRvB\Exceptions\NotFoundException;
 use ITRvB\Http\Request;
+use ITRvB\Http\ResponseManager;
 use ITRvB\Repositories\ArticleRepositoryInterface;
 use ITRvB\Repositories\Connection\MySQL;
 use Exception;
@@ -30,7 +31,7 @@ class ArticleController implements IController
             try {
                 $articleUUID = new UUID((string)$arg['uuid']);
             } catch (Exception $ex) {
-                $response = $this->unprocessableEntityResponse();
+                $response = ResponseManager::unprocessableEntityResponse();
             }
         }
 
@@ -51,7 +52,7 @@ class ArticleController implements IController
                     $response = $this->deleteArticle($articleUUID);
                     break;
                 default:
-                    $response = $this->notFoundResponse();
+                    $response = ResponseManager::notFoundResponse();
                     break;
             }
         }
@@ -75,7 +76,7 @@ class ArticleController implements IController
             $response['body'] = json_encode($article);
             return $response;
         } catch(NotFoundException $e) {
-            return $this->notFoundResponse();
+            return ResponseManager::notFoundResponse();
         }
     }
 
@@ -84,7 +85,7 @@ class ArticleController implements IController
         $input = $request->getBody();
         $article = $this->validateArticle($input);
         if (!$article) {
-            return $this->unprocessableEntityResponse();
+            return ResponseManager::unprocessableEntityResponse();
         }
 
         $this->repo->save($article);
@@ -99,7 +100,7 @@ class ArticleController implements IController
 
     private function deleteArticle(UUID $articleUUID)
     {
-        if (!$articleUUID) return $this->notFoundResponse();
+        if (!$articleUUID) return ResponseManager::notFoundResponse();
 
         $this->repo->delete($articleUUID);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -128,23 +129,5 @@ class ArticleController implements IController
         catch (Exception $ex) {
             return null;
         }
-    }
-
-    private function unprocessableEntityResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
-        return $response;
-    }
-
-    private function notFoundResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = json_encode([
-            'error' => 'Not found with given arguments'
-        ]);
-        return $response;
     }
 }
