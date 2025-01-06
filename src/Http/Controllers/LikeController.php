@@ -9,6 +9,7 @@ use ITRvB\Models\User;
 use ITRvB\Models\UUID;
 use ITRvB\Http\Request;
 use ITRvB\Http\ResponseManager;
+use ITRvB\Http\AuthorizationManager;
 use ITRvB\Repositories\LikeRepositoryInterface;
 use ITRvB\Repositories\ArticleRepositoryInterface;
 use ITRvB\Repositories\Connection\MySQL;
@@ -23,37 +24,31 @@ class LikeController implements IController
         $this->repo = new LikeRepositoryInterface($mysql);
     }
 
-    private function getArguments(Request $request) : array
+    private function getArticleUuid(Request $request) : ?UUID
     {
         $args = $request->getArguments();
         
         try {
-            $result = [
-                'article' => new UUID((string)$args['article'])
-            ];
-            if (isset($args['user'])) {
-                $result['user'] = new UUID((string)$args['user']);
-            }
-            return $result;
+            return new UUID((string)$args['article']);
         } catch (Exception $ex) {
-            return [];
+            return null;
         }
     }
 
     public function processRequest(Request $request)
     {
-        $args = $this->getArguments($request);
-        if (count($args) === 0) return ResponseManager::unprocessableEntityResponse();
+        $articleUuid = $this->getArticleUuid($request);
+        if (!$articleUuid) return ResponseManager::unprocessableEntityResponse();
 
         switch ($request->getRequestMethod()) {
             case 'GET':
-                $response = $this->getLikeCount($args['article']);
+                $response = $this->getLikeCount($articleUuid);
                 break;
             case 'POST':
-                $response = $this->leaveLike($args);
+                $response = $this->leaveLike($request, $articleUuid);
                 break;
             case 'DELETE':
-                $response = $this->removeLike($args);
+                $response = $this->removeLike($request, $articleUuid);
                 break;
             default:
                 $response = ResponseManager::methodNotAllowed();
@@ -74,14 +69,18 @@ class LikeController implements IController
         return $response;
     }
 
-    private function leaveLike(array $args)
+    private function leaveLike(Request $request, UUID $articleUuid)
     {
-        $article = $this->validateArticle($args);
-        $user = $this->validateUser($args);
-        if (!$article || !$user) {
+        if (!AuthorizationManager::isAuthorized($request, $this->repo->getConnection())) {
+            return ResponseManager::unauthorizedResponse();
+        }
+
+        $article = $this->validateArticle($articleUuid);
+        if (!$article) {
             return ResponseManager::unprocessableEntityResponse();
         }
 
+        $user = AuthorizationManager::getCurrentUser($request, $this->repo->getConnection());
         if ($this->repo->hasUserLiked($article->id, $user->id)) {
             return ResponseManager::makeBadRequestResponse('This user had already left a like for this article');
         }
@@ -101,13 +100,18 @@ class LikeController implements IController
         return $response;
     }
 
-    private function removeLike(array $args)
+    private function removeLike(Request $request, UUID $articleUuid)
     {
-        if (!isset($args['user']) || !$this->repo->hasUserLiked($args['article'], $args['user'])) {
+        if (!AuthorizationManager::isAuthorized($request, $this->repo->getConnection())) {
+            return ResponseManager::unauthorizedResponse();
+        }
+
+        $user = AuthorizationManager::getCurrentUser($request, $this->repo->getConnection());
+        if (!$this->repo->hasUserLiked($articleUuid, $user->id)) {
             return ResponseManager::unprocessableEntityResponse();
         }
 
-        $like = $this->repo->getLikeByArticleAndUser($args['article'], $args['user']);
+        $like = $this->repo->getLikeByArticleAndUser($articleUuid, $user->id);
 
         $this->repo->delete($like->id);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -118,33 +122,12 @@ class LikeController implements IController
         return $response;
     }
 
-    private function validateArticle(array $args)
+    private function validateArticle(UUID $articleUuid)
     {
-        if (!isset($args['article'])) {
-            return null;
-        }
-
         try {
-            $articleUuid = $args['article'];
             $articleRepository = new ArticleRepositoryInterface($this->repo->getConnection());
             $article = $articleRepository->get($articleUuid);
             return $article;
-        }
-        catch (Exception $ex) {
-            return null;
-        }
-    }
-
-    private function validateUser(array $args)
-    {
-        if (!isset($args['user'])) {
-            return null;
-        }
-
-        try {
-            $userUuid = $args['user'];
-            $user = $this->repo->getConnection()->getUser($userUuid);
-            return $user;
         }
         catch (Exception $ex) {
             return null;
