@@ -5,9 +5,11 @@ namespace ITRvB\Http\Controllers\Auth;
 use ITRvB\Interfaces\IController;
 use ITRvB\Models\User;
 use ITRvB\Models\UUID;
+use ITRvB\Models\AuthToken;
 use ITRvB\Http\Request;
 use ITRvB\Http\ResponseManager;
 use ITRvB\Repositories\Connection\MySQL;
+use ITRvB\Repositories\TokenRepositoryInterface;
 use ITRvB\Exceptions\ArgumentException;
 use Exception;
 
@@ -46,14 +48,17 @@ class RegisterController implements IController
         }
 
         $this->mysql->addUser($user);
-        // gen token
+        
+        $tokenRepository = new TokenRepositoryInterface($this->mysql);
+        $token = $tokenRepository->getOrCreateToken($user->id);
 
         return [
             'status_code_header' => 'HTTP/1.1 200 OK',
             'body' => json_encode([
                 'result' => 'Successfully registered',
                 'uuid' => $user->id,
-                // token
+                'token' => $token->getToken(),
+                'token_expiration_date' => $token->getAtomExpirationDate()
             ]),
         ];
     }

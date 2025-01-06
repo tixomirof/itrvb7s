@@ -5,9 +5,11 @@ namespace ITRvB\Http\Controllers\Auth;
 use ITRvB\Interfaces\IController;
 use ITRvB\Models\User;
 use ITRvB\Models\UUID;
+use ITRvB\Models\AuthToken;
 use ITRvB\Http\Request;
 use ITRvB\Http\ResponseManager;
 use ITRvB\Repositories\Connection\MySQL;
+use ITRvB\Repositories\TokenRepositoryInterface;
 use Exception;
 
 class LoginController implements IController
@@ -38,13 +40,16 @@ class LoginController implements IController
             return ResponseManager::makeBadRequestResponse('Wrong password');
         }
 
-        // gen token
+        $tokenRepository = new TokenRepositoryInterface($this->mysql);
+        $token = $tokenRepository->getOrCreateToken($user->id);
 
         return [
             'status_code_header' => 'HTTP/1.1 200 OK',
             'body' => json_encode([
                 'result' => 'Successfully logged in',
-                // token
+                'token' => $token->getToken(),
+                'token_expiration_date' => $token->getAtomExpirationDate(),
+                'logged_user_uuid' => $token->getUserUuid(),
             ]),
         ];
     }
