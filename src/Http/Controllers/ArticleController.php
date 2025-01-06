@@ -50,7 +50,7 @@ class ArticleController implements IController
                     $response = $this->createArticleFromRequest($request);
                     break;
                 case 'DELETE':
-                    $response = $this->deleteArticle($articleUUID);
+                    $response = $this->deleteArticle($request, $articleUUID);
                     break;
                 default:
                     $response = ResponseManager::notFoundResponse();
@@ -103,9 +103,24 @@ class ArticleController implements IController
         return $response;
     }
 
-    private function deleteArticle(UUID $articleUUID)
+    private function deleteArticle(Request $request, UUID $articleUUID)
     {
+        if (!AuthorizationManager::isAuthorized($request, $this->repo->getConnection())) {
+            return ResponseManager::unauthorizedResponse();
+        }
+
         if (!$articleUUID) return ResponseManager::notFoundResponse();
+
+        $user = AuthorizationManager::getCurrentUser($request, $this->repo->getConnection());
+        try {
+            $article = $this->repo->get($articleUUID);
+        } catch (Exception $e) {
+            return ResponseManager::notFoundResponse();
+        }
+
+        if ($user->id != $article->author->id) {
+            return ResponseManager::makeBadRequestResponse('Cannot delete article which author is not you');
+        }
 
         $this->repo->delete($articleUUID);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
