@@ -42,7 +42,6 @@ class ArticleControllerTest extends TestCase
     public static function tearDownAfterClass() : void
     {
         self::$mysql->deleteUser(self::$authorizedUser->id);
-        self::$mysql->deleteUser(self::$unauthorizedUser->id);
 
         if (!self::$mysql->isDisposed())
             self::$mysql->dispose();
