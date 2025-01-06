@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Янв 05 2025 г., 13:12
+-- Время создания: Янв 06 2025 г., 13:41
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -64,6 +64,25 @@ INSERT INTO `articles` (`uuid`, `author_id`, `header`, `text`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Структура таблицы `authTokens`
+--
+
+CREATE TABLE `authTokens` (
+  `user_id` varchar(36) NOT NULL,
+  `expiresOn` datetime NOT NULL,
+  `token` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `authTokens`
+--
+
+INSERT INTO `authTokens` (`user_id`, `expiresOn`, `token`) VALUES
+('122fd21d-4975-49e4-a316-6d46036b129f', '2025-01-06 13:37:44', '3cf2823be37eb3ad741f705acfc201cf9f9780199bc284d57e9fb4a4ef26468d0831d1eb18e22185');
+
+-- --------------------------------------------------------
+
+--
 -- Структура таблицы `comments`
 --
 
@@ -101,6 +120,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`uuid`, `name`, `surname`, `password`) VALUES
+('122fd21d-4975-49e4-a316-6d46036b129f', 'Boris', 'Huvibed', '84e8f79db24c5f91cfbdc4dd308542d965f4fd4cd935c79e1fa0e1880f8185d2'),
 ('1e54e6a0-6844-45a9-934d-9ec512ec7fc8', 'Eriberto', 'Macejkovic', '123'),
 ('273a1d82-3c33-4afa-a833-2a800f8d4d3a', 'Jazmyne', 'Schuster', '123'),
 ('3c06db8f-5340-4b5b-96a0-f30ab4f3272b', 'Carol', 'McDermott', '123'),
@@ -132,6 +152,12 @@ ALTER TABLE `articles`
   ADD KEY `articles_FK_1` (`author_id`);
 
 --
+-- Индексы таблицы `authTokens`
+--
+ALTER TABLE `authTokens`
+  ADD UNIQUE KEY `user_id` (`user_id`);
+
+--
 -- Индексы таблицы `comments`
 --
 ALTER TABLE `comments`
@@ -161,6 +187,12 @@ ALTER TABLE `articleLikes`
 --
 ALTER TABLE `articles`
   ADD CONSTRAINT `articles_FK_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`uuid`);
+
+--
+-- Ограничения внешнего ключа таблицы `authTokens`
+--
+ALTER TABLE `authTokens`
+  ADD CONSTRAINT `authTokens_FK_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ограничения внешнего ключа таблицы `comments`
