@@ -9,6 +9,7 @@ class FakeRequest extends Request
     public string $requestMethod;
     public ?string $uuid;
     public array $body;
+    public array $headers;
 
     public function __construct(string $requestMethod = "GET", ?string $uuid = null)
     {
@@ -33,5 +34,10 @@ class FakeRequest extends Request
     public function getBody() : array
     {
         return $this->body;
+    }
+
+    public function getHeader(string $headerName) : string
+    {
+        return isset($this->headers[$headerName]) ? $this->headers[$headerName] : 'EMPTY';
     }
 }
