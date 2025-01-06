@@ -5,6 +5,7 @@ namespace ITRvB\Repositories;
 use ITRvB\Interfaces\IRepository;
 use ITRvB\Models\AuthToken;
 use ITRvB\Models\UUID;
+use ITRvB\Models\User;
 use ITRvB\Repositories\Connection\MySQL;
 use ITRvB\Singletons\Logger;
 use DateTimeImmutable;
@@ -61,6 +62,38 @@ class TokenRepositoryInterface implements IRepository
             return $this->createTokenFor($userUuid);
         }
         return $token;
+    }
+
+    public function tryGetUserByToken(string $token) : ?User
+    {
+        Logger::info("TokenRepository: retrieving user by token $token");
+
+        $query = $this->mysql->query(
+            "SELECT * FROM users INNER JOIN authTokens ON users.uuid = authTokens.user_id WHERE authTokens.token = '$token'");
+        if ($query->num_rows === 0) {
+            Logger::info("TokenRepository: invalid token sent. No such token is present in the database.");
+            return null;
+        }
+
+        while ($data = $query->fetch_assoc())
+        {
+            $authToken = $this->dataToAuthToken($data);
+
+            if (!$authToken->hasExpired()) {
+                $user = new User(
+                    new UUID($data['uuid']),
+                    $data['password'],
+                    $data['name'],
+                    $data['surname']
+                );
+                return $user;
+            } else {
+                Logger::warning("TokenRepository: expired token detected. Deleting it.");
+                $this->delete($authToken->getUserUuid());
+            }
+        }
+
+        return null;
     }
 
     public function save($model) : void

@@ -8,6 +8,7 @@ use ITRvB\Models\UUID;
 use ITRvB\Exceptions\NotFoundException;
 use ITRvB\Http\Request;
 use ITRvB\Http\ResponseManager;
+use ITRvB\Http\AuthorizationManager;
 use ITRvB\Repositories\ArticleRepositoryInterface;
 use ITRvB\Repositories\Connection\MySQL;
 use Exception;
@@ -82,8 +83,12 @@ class ArticleController implements IController
 
     private function createArticleFromRequest(Request $request)
     {
+        if (!AuthorizationManager::isAuthorized($request, $this->repo->getConnection())) {
+            return ResponseManager::unauthorizedResponse();
+        }
+
         $input = $request->getBody();
-        $article = $this->validateArticle($input);
+        $article = $this->validateArticle($request, $input);
         if (!$article) {
             return ResponseManager::unprocessableEntityResponse();
         }
@@ -110,17 +115,16 @@ class ArticleController implements IController
         return $response;
     }
 
-    private function validateArticle($input)
+    private function validateArticle(Request $request, array $input) : ?Article
     {
-        if (!isset($input['header']) || !isset($input['text']) || !isset($input['author_id'])) {
+        if (!isset($input['header']) || !isset($input['text'])) {
             return null;
         }
 
         try {
             $articleUUID = isset($input['uuid']) ? new UUID($input['uuid']) : UUID::random(); // check if UUID is valid
-            $authorUUID = new UUID($input['author_id']); // check if UUID is valid
 
-            $author = $this->repo->getConnection()->getUser($authorUUID); // check if DB has user with given UUID
+            $author = AuthorizationManager::getCurrentUser($request, $this->repo->getConnection());
 
             $article = new Article($articleUUID, $author, $input['header'], $input['text']); // check if object creates successfully
 

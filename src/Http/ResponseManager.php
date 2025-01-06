@@ -39,4 +39,13 @@ class ResponseManager
         ]);
         return $response;
     }
+
+    public static function unauthorizedResponse()
+    {
+        $response['status_code_header'] = 'HTTP/1.1 401 Unauthorized';
+        $response['body'] = json_encode([
+            'error' => 'Please, fill the Authorization header with your bearer token'
+        ]);
+        return $response;
+    }
 }

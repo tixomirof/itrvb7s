@@ -36,6 +36,12 @@ class Request
         return (array) json_decode(file_get_contents('php://input'), TRUE);
     }
 
+    public function getHeader(string $headerName) : string
+    {
+        $headers = getallheaders();
+        return isset($headers[$headerName]) ? $headers[$headerName] : "EMPTY";
+    }
+
     public function process(IController $controller)
     {
         $this->setCors();
