@@ -82,6 +82,10 @@ displayData($mysql);
 
 $mysql->dispose();
 
+require __DIR__ . '/tests/ApiControllers/ArticleControllerTest.php';
+use ITRvB\UnitTests\ArticleControllerTest;
+ArticleControllerTest::setUpBeforeClass();
+
 ?>
 </body>
 </html>

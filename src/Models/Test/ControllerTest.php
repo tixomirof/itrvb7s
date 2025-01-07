@@ -50,6 +50,8 @@ abstract class ControllerTest extends TestCase
 
         $tokenRepository = new TokenRepositoryInterface(self::$mysql);
         self::$token = 'Bearer ' . $tokenRepository->getOrCreateToken(self::$sampleUser->id)->getToken();
+
+        $controllerTest->fillFields();
     }
 
     public static function tearDownAfterClass() : void
@@ -64,6 +66,8 @@ abstract class ControllerTest extends TestCase
     protected abstract function instantiateController() : IController;
 
     protected abstract function baseArguments() : array;
+
+    protected function fillFields() : void {}
 
     protected function genAuthorizedFakeRequest(string $method) : FakeRequest
     {

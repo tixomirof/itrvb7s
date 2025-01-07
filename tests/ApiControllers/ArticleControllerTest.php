@@ -4,59 +4,52 @@ namespace ITRvB\UnitTests;
 
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\TestWith;
-use PHPUnit\Framework\TestCase;
 use ITRvB\Models\Article;
 use ITRvB\Models\UUID;
-use ITRvB\Models\User;
 use ITRvB\Models\Test\FakeRequest;
+use ITRvB\Models\Test\ControllerTest;
+use ITRvB\Interfaces\IController;
 use ITRvB\Http\Controllers\ArticleController;
-use ITRvB\Repositories\TokenRepositoryInterface;
-use ITRvB\Repositories\Connection\MySQL;
 
-class ArticleControllerTest extends TestCase
+class ArticleControllerTest extends ControllerTest
 {
-    private static ArticleController $controller;
-    private static MySQL $mysql;
-    private static User $authorizedUser;
-    private static string $token;
-
-    public static function setUpBeforeClass() : void
-    {
-        self::$mysql = new MySQL();
-        self::$controller = new ArticleController();
-        self::$controller->init(self::$mysql);
-
-        self::$authorizedUser = new User(
-            UUID::random(),
-            '123',
-            'ArticleControllerTest',
-            'AuthorizedUser'
-        );
-
-        self::$mysql->addUser(self::$authorizedUser);
-
-        $tokenRepository = new TokenRepositoryInterface(self::$mysql);
-        self::$token = 'Bearer ' . $tokenRepository->getOrCreateToken(self::$authorizedUser->id)->getToken();
-    }
-
-    public static function tearDownAfterClass() : void
-    {
-        self::$mysql->deleteUser(self::$authorizedUser->id);
-
-        if (!self::$mysql->isDisposed())
-            self::$mysql->dispose();
-    }
+    protected static Article $article;
 
     private function getArticleJSON(array $response) : string
     {
         return json_encode(((array)json_decode($response['body']))['article']);
     }
 
+    protected function getTestName() : string
+    {
+        return 'Article';
+    }
+
+    protected function instantiateController() : IController
+    {
+        return new ArticleController();
+    }
+
+    protected function fillFields() : void
+    {
+        self::$article = new Article(
+            UUID::random(),
+            self::$sampleUser,
+            'ArticleControllerTest',
+            'CreatableArticle'
+        );
+    }
+
+    protected function baseArguments() : array
+    {
+        return ['uuid' => self::$article->id];
+    }
+
     public function testGetAll() : void
     {
         $request = new FakeRequest();
         $response = self::$controller->processRequest($request);
-        $this->assertSame($response['status_code_header'], 'HTTP/1.1 200 OK');
+        $this->assertOK($response);
     }
 
     #[TestWith(["58bac195-951e-ffff-61bb-a517b2e84100", false, "header", "text", '401 Unauthorized'])] // unauthorized user
@@ -83,99 +76,78 @@ class ArticleControllerTest extends TestCase
     }
 
     #[Depends('testPostFailure')]
-    public function testPost() : Article
+    public function testPost() : void
     {
-        $article = new Article(
-            UUID::random(),
-            self::$authorizedUser,
-            'sample header',
-            'sample text'
-        );
-
-        $request = new FakeRequest('POST');
-        $request->headers = [
-            'Authorization' => self::$token
-        ];
+        $request = $this->genAuthorizedFakeRequest('POST');
         $request->body = [
-            'uuid' => $article->id,
-            'header' => $article->header,
-            'text' => $article->text
+            'uuid' => self::$article->id,
+            'header' => self::$article->header,
+            'text' => self::$article->text
         ];
 
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 201 Created', $response['status_code_header']);
-        $this->assertSame(json_encode($article), $this->getArticleJSON($response));
-
-        return $article;
+        $this->assertCreated($response);
+        $this->assertSame(json_encode(self::$article), $this->getArticleJSON($response));
     }
 
     #[Depends('testPost')]
-    public function testGet(Article $article) : Article
+    public function testGet() : void
     {
-        $request = new FakeRequest('GET');
-        $request->arguments = ['uuid' => $article->id];
+        $request = $this->genAuthorizedFakeRequest('GET');
         
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 200 OK', $response['status_code_header']);
-        $this->assertSame(json_encode($article), $response['body']);
-
-        return $article;
+        $this->assertOK($response);
+        $this->assertSame(json_encode(self::$article), $response['body']);
     }
 
     #[Depends('testGet')]
-    public function testUnauthorizedDelete(Article $article) : Article
+    public function testUnauthorizedDelete() : void
     {
-        $request = new FakeRequest('DELETE');
-        $request->arguments = ['uuid' => $article->id];
+        $request = $this->genUnauthorizedFakeRequest('DELETE');
 
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 401 Unauthorized', $response['status_code_header']);
-
-        return $article;
+        $this->assertUnauthorized($response);
     } 
 
     #[Depends('testUnauthorizedDelete')]
-    public function testDelete(Article $article) : Article
+    public function testDelete() : void
     {
-        $request = new FakeRequest('DELETE');
-        $request->arguments = ['uuid' => $article->id];
-
-        $request->headers = [
-            'Authorization' => self::$token
-        ];
+        $request = $this->genAuthorizedFakeRequest('DELETE');
 
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 200 OK', $response['status_code_header']);
-
-        return $article;
+        $this->assertOK($response);
     }
 
     #[Depends('testDelete')]
-    public function testGetNonExistent(Article $article) : Article
+    public function testGetNonExistent() : void
     {
-        $request = new FakeRequest('GET');
-        $request->arguments = ['uuid' => $article->id];
+        $request = $this->genUnauthorizedFakeRequest('GET');
 
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 404 Not Found', $response['status_code_header']);
-
-        return $article;
+        $this->assertNotFound($response);
     }
 
     #[Depends('testGetNonExistent')]
-    public function testPostAutoUuid(Article $article) : void
+    public function testDeleteUnexistent() : void
     {
-        $headers = ['Authorization' => self::$token];
-        $request = new FakeRequest('POST');
-        $request->body = [
-            'author_id' => $article->author->id,
-            'header' => $article->header,
-            'text' => $article->text,
-        ];
-        $request->headers = $headers;
+        $request = $this->genAuthorizedFakeRequest('DELETE');
 
         $response = self::$controller->processRequest($request);
-        $this->assertSame('HTTP/1.1 201 Created', $response['status_code_header']);
+        $this->assertNotFound($response);
+    }
+
+    #[Depends('testDeleteUnexistent')]
+    public function testPostAutoUuid() : void
+    {
+        $request = $this->genAuthorizedFakeRequest('POST');
+        $request->body = [
+            'author_id' => self::$article->author->id,
+            'header' => self::$article->header,
+            'text' => self::$article->text,
+        ];
+
+        $response = self::$controller->processRequest($request);
+        $this->assertCreated($response);
 
         $articleBody = (array)json_decode($this->getArticleJSON($response));
         $this->assertTrue(isset($articleBody['id']));
@@ -184,10 +156,9 @@ class ArticleControllerTest extends TestCase
         $randomlyGeneratedUuid = new UUID($articleBody['id']);
 
         // delete created object
-        $deleteRequest = new FakeRequest('DELETE');
+        $deleteRequest = $this->genAuthorizedFakeRequest('DELETE');
         $deleteRequest->arguments = ['uuid' => (string)$randomlyGeneratedUuid];
-        $deleteRequest->headers = $headers;
         $deleteResponse = self::$controller->processRequest($deleteRequest);
-        $this->assertSame('HTTP/1.1 200 OK', $deleteResponse['status_code_header']);
+        $this->assertOK($deleteResponse);
     }
 }
