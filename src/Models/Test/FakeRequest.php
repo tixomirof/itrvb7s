@@ -7,23 +7,21 @@ use ITRvB\Http\Request;
 class FakeRequest extends Request
 {
     public string $requestMethod;
-    public ?string $uuid;
+    public array $arguments;
     public array $body;
     public array $headers;
 
-    public function __construct(string $requestMethod = "GET", ?string $uuid = null)
+    public function __construct(string $requestMethod = "GET")
     {
         $this->requestMethod = $requestMethod;
-        $this->uuid = $uuid;
+        $this->arguments = [];
         $this->body = [];
+        $this->headers = [];
     }
 
     public function getArguments() : array
     {
-        if (is_null($this->uuid)) return array();
-        return [
-            'uuid' => $this->uuid
-        ];
+        return $this->arguments;
     }
 
     public function getRequestMethod() : string

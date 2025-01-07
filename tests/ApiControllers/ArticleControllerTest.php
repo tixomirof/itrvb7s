@@ -112,7 +112,8 @@ class ArticleControllerTest extends TestCase
     #[Depends('testPost')]
     public function testGet(Article $article) : Article
     {
-        $request = new FakeRequest('GET', $article->id);
+        $request = new FakeRequest('GET');
+        $request->arguments = ['uuid' => $article->id];
         
         $response = self::$controller->processRequest($request);
         $this->assertSame('HTTP/1.1 200 OK', $response['status_code_header']);
@@ -124,7 +125,8 @@ class ArticleControllerTest extends TestCase
     #[Depends('testGet')]
     public function testUnauthorizedDelete(Article $article) : Article
     {
-        $request = new FakeRequest('DELETE', $article->id);
+        $request = new FakeRequest('DELETE');
+        $request->arguments = ['uuid' => $article->id];
 
         $response = self::$controller->processRequest($request);
         $this->assertSame('HTTP/1.1 401 Unauthorized', $response['status_code_header']);
@@ -135,7 +137,8 @@ class ArticleControllerTest extends TestCase
     #[Depends('testUnauthorizedDelete')]
     public function testDelete(Article $article) : Article
     {
-        $request = new FakeRequest('DELETE', $article->id);
+        $request = new FakeRequest('DELETE');
+        $request->arguments = ['uuid' => $article->id];
 
         $request->headers = [
             'Authorization' => self::$token
@@ -150,7 +153,8 @@ class ArticleControllerTest extends TestCase
     #[Depends('testDelete')]
     public function testGetNonExistent(Article $article) : Article
     {
-        $request = new FakeRequest('GET', $article->id);
+        $request = new FakeRequest('GET');
+        $request->arguments = ['uuid' => $article->id];
 
         $response = self::$controller->processRequest($request);
         $this->assertSame('HTTP/1.1 404 Not Found', $response['status_code_header']);
@@ -180,7 +184,8 @@ class ArticleControllerTest extends TestCase
         $randomlyGeneratedUuid = new UUID($articleBody['id']);
 
         // delete created object
-        $deleteRequest = new FakeRequest('DELETE', (string)$randomlyGeneratedUuid);
+        $deleteRequest = new FakeRequest('DELETE');
+        $deleteRequest->arguments = ['uuid' => (string)$randomlyGeneratedUuid];
         $deleteRequest->headers = $headers;
         $deleteResponse = self::$controller->processRequest($deleteRequest);
         $this->assertSame('HTTP/1.1 200 OK', $deleteResponse['status_code_header']);
