@@ -47,4 +47,9 @@ class AuthToken
     {
         return DateInterval::createFromDateString('15 minutes');
     }
+
+    public static function generateTokenString() : string
+    {
+        return bin2hex(random_bytes(40));
+    }
 }

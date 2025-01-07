@@ -8,6 +8,7 @@ use ITRvB\Models\UUID;
 use ITRvB\Models\User;
 use ITRvB\Repositories\Connection\MySQL;
 use ITRvB\Singletons\Logger;
+use ITRvB\Exceptions\NotFoundException;
 use DateTimeImmutable;
 
 class TokenRepositoryInterface implements IRepository
@@ -21,14 +22,11 @@ class TokenRepositoryInterface implements IRepository
     {
         Logger::info("TokenRepository: retrieving token for user $uuid");
 
-        $tokenQuery = $this->mysql->query("SELECT * FROM authTokens WHERE authTokens.user_id = '$uuid' LIMIT 1");
-        if ($tokenQuery->num_rows == 0)
-        {
-            Logger::info("TokenRepository: no token was found for user $uuid. Initializating a new token...");
-            return $this->createTokenFor($uuid);
-        }
+        $tokenData = $this->mysql->queryWithException(
+            "SELECT * FROM authTokens WHERE authTokens.user_id = '$uuid' LIMIT 1",
+            "TokenRepository: no token was found for user $uuid."
+        )->fetch_assoc();
 
-        $tokenData = $tokenQuery->fetch_assoc();
         $authToken = $this->dataToAuthToken($tokenData);
 
         return $authToken;
@@ -36,7 +34,7 @@ class TokenRepositoryInterface implements IRepository
 
     public function createTokenFor(UUID $userUuid) : AuthToken
     {
-        $token = bin2hex(random_bytes(40));
+        $token = AuthToken::generateTokenString();
 
         $user = $this->mysql->getUser($userUuid);
         
@@ -56,7 +54,11 @@ class TokenRepositoryInterface implements IRepository
 
     public function getOrCreateToken(UUID $userUuid) : AuthToken
     {
-        $token = $this->get($userUuid);
+        try {
+            $token = $this->get($userUuid);
+        } catch (NotFoundException $nfe) {
+            $token = $this->createTokenFor($userUuid);
+        }
         if ($token->hasExpired()) {
             $this->delete($token->getUserUuid());
             return $this->createTokenFor($userUuid);
