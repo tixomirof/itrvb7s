@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Янв 06 2025 г., 13:41
+-- Время создания: Янв 07 2025 г., 16:49
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -38,7 +38,8 @@ CREATE TABLE `articleLikes` (
 --
 
 INSERT INTO `articleLikes` (`uuid`, `article_id`, `user_id`) VALUES
-('46c7b880-cb00-4513-8671-4b4a2a6a31a5', '1b42fe64-a369-47f7-a269-360a3f785e5c', '273a1d82-3c33-4afa-a833-2a800f8d4d3a');
+('46c7b880-cb00-4513-8671-4b4a2a6a31a5', '1b42fe64-a369-47f7-a269-360a3f785e5c', '273a1d82-3c33-4afa-a833-2a800f8d4d3a'),
+('d5931131-b771-414b-a813-74465c739b40', '3b1e1a63-1227-42ef-8587-aeccf23ba06e', '122fd21d-4975-49e4-a316-6d46036b129f');
 
 -- --------------------------------------------------------
 
@@ -78,7 +79,7 @@ CREATE TABLE `authTokens` (
 --
 
 INSERT INTO `authTokens` (`user_id`, `expiresOn`, `token`) VALUES
-('122fd21d-4975-49e4-a316-6d46036b129f', '2025-01-06 13:37:44', '3cf2823be37eb3ad741f705acfc201cf9f9780199bc284d57e9fb4a4ef26468d0831d1eb18e22185');
+('122fd21d-4975-49e4-a316-6d46036b129f', '2025-01-06 16:05:02', '998a13e86b7d977e54fe5c3740b5fda51ce8934989724ce7ef89988d58ce683cd161326ba8566ad3');
 
 -- --------------------------------------------------------
 
@@ -186,7 +187,7 @@ ALTER TABLE `articleLikes`
 -- Ограничения внешнего ключа таблицы `articles`
 --
 ALTER TABLE `articles`
-  ADD CONSTRAINT `articles_FK_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`uuid`);
+  ADD CONSTRAINT `articles_FK_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`uuid`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Ограничения внешнего ключа таблицы `authTokens`
