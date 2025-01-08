@@ -10,7 +10,7 @@
 <?php
 require_once __DIR__ . "/vendor/autoload.php";
 
-use ITRvB\Repositories\Seeders\UserSeeder;
+use ITRvB\Repositories\Seeders\DataSeeder;
 use ITRvB\Repositories\Connection\MySQL;
 use ITRvB\Repositories\ArticleRepositoryInterface;
 use ITRvB\Repositories\CommentRepositoryInterface;
@@ -21,25 +21,8 @@ use ITRvB\Models\UUID;
 
 function createData(MySQL $mysql)
 {
-    $articleRepository = new ArticleRepositoryInterface($mysql);
-    $commentRepository = new CommentRepositoryInterface($mysql);
-    
-    $userSeeder = new UserSeeder($mysql);
-    $users = $userSeeder->seed(10);
-
-    $faker = Faker\Factory::create();
-    $articleAuthor = $users[array_rand($users)];
-    $article = new Article(UUID::random(), $articleAuthor, $faker->sentence(), $faker->text(3000));
-
-    $articleRepository->save($article);
-
-    $comment_count = $faker->randomDigit();
-    for ($i=0; $i < $comment_count; $i++) {
-        $commentAuthor = $users[array_rand($users)]; 
-        $comment = new Comment(UUID::random(), $commentAuthor, $article, $faker->text($faker->randomNumber(3, false)));
-
-        $commentRepository->save($comment);
-    }
+    $dataSeeder = new DataSeeder($mysql);
+    $dataSeeder->seed(10, 4);
 }
 
 function displayData(MySQL $mysql)
@@ -77,14 +60,10 @@ function displayData(MySQL $mysql)
 
 $mysql = new MySQL();
 
-//createData($mysql);
+createData($mysql);
 displayData($mysql);
 
 $mysql->dispose();
-
-// require __DIR__ . '/tests/ApiControllers/ArticleControllerTest.php';
-// use ITRvB\UnitTests\ArticleControllerTest;
-// ArticleControllerTest::setUpBeforeClass();
 
 ?>
 </body>
