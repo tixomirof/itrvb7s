@@ -56,6 +56,9 @@ abstract class ControllerTest extends TestCase
 
     public static function tearDownAfterClass() : void
     {
+        $controllerTest = new static('ControllerTest');
+        $controllerTest->unfillFields();
+        
         self::$mysql->deleteUser(self::$sampleUser->id);
 
         if (!self::$mysql->isDisposed())
@@ -68,6 +71,7 @@ abstract class ControllerTest extends TestCase
     protected abstract function baseArguments() : array;
 
     protected function fillFields() : void {}
+    protected function unfillFields() : void {}
 
     protected function genAuthorizedFakeRequest(string $method) : FakeRequest
     {
@@ -82,15 +86,10 @@ abstract class ControllerTest extends TestCase
         $request->arguments = $this->baseArguments();
         return $request;
     }
-    
-    protected function getArrayByKey(array $response, string $key) : array
-    {
-        return (array)json_decode($response[$key]);
-    }
 
     protected function getBody(array $response) : array
     {
-        return $this->getArrayByKey($response, 'body');
+        return (array)json_decode($response['body'], true);
     }
 
     protected function assertResponseStatus(array $response, string $expectedStatus) : void
